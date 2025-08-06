@@ -6,6 +6,8 @@ import threading
 import time
 import random
 import string
+import os
+from datetime import datetime
 
 def gerar_email_aleatorio():
     nome_email = ''.join(random.choices(string.ascii_lowercase, k=10))
@@ -119,6 +121,66 @@ while not parar_execucao:
                 WebDriverWait(navegador, 10).until(
                     EC.invisibility_of_element_located((By.CSS_SELECTOR, ".chakra-modal__content-container"))
                 )
+
+                # Clique no botão do accordion pelo ID com MouseEvent
+                try:
+                    accordion_botao = WebDriverWait(navegador, 5).until(
+                        EC.presence_of_element_located((By.ID, "accordion-button-best-k-pop"))
+                    )
+                    click_script = """
+                        var evt = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        });
+                        arguments[0].dispatchEvent(evt);
+                    """
+                    navegador.execute_script(click_script, accordion_botao)
+                    print("Accordion [best-k-pop] clique via MouseEvent disparado.")
+
+                    # Aguarda o atributo aria-expanded mudar para "true"
+                    WebDriverWait(navegador, 10).until(
+                        lambda driver: accordion_botao.get_attribute("aria-expanded") == "true"
+                    )
+                    print("Accordion expandido.")
+
+                    # Captura o 14º elemento (índice 13)
+                    elementos_accordion = WebDriverWait(navegador, 10).until(
+                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".chakra-accordion__item.css-pnnn2f"))
+                    )
+                    if len(elementos_accordion) >= 14:
+                        elemento_para_print = elementos_accordion[13]
+                    else:
+                        raise Exception(f"Esperado ao menos 14 elementos, mas encontrados {len(elementos_accordion)}")
+
+                    navegador.execute_script("""
+                        arguments[0].style.maxHeight = 'none';
+                        arguments[0].style.overflow = 'visible';
+                    """, elemento_para_print)
+
+                    navegador.execute_script("arguments[0].scrollIntoView({block: 'center'});", elemento_para_print)
+                    time.sleep(1)
+
+                    # Captura o QUINTO elemento com classe css-0 dentro do accordion
+                    elementos_css0 = elemento_para_print.find_elements(By.CSS_SELECTOR, ".css-0")
+                    if len(elementos_css0) >= 5:
+                        quinto_elemento = elementos_css0[4]
+                        navegador.execute_script("arguments[0].scrollIntoView({block: 'center'});", quinto_elemento)
+                        time.sleep(1)
+
+                        caminho_captura = r"D:\\capturaVmaLisa"
+                        if not os.path.exists(caminho_captura):
+                            os.makedirs(caminho_captura)
+                        nome_arquivo = f"css0_5_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+                        caminho_completo = os.path.join(caminho_captura, nome_arquivo)
+                        quinto_elemento.screenshot(caminho_completo)
+                        print(f"Print do 5º .css-0 salvo em: {caminho_completo}")
+                    else:
+                        print(f"Menos de 5 elementos com classe .css-0 encontrados: {len(elementos_css0)}")
+
+                except Exception as e:
+                    print(f"Erro ao clicar, expandir ou tirar print do accordion: {e}")
+
                 navegador.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 time.sleep(2)
                 botao_login = WebDriverWait(navegador, 10).until(
@@ -137,4 +199,5 @@ while not parar_execucao:
     except Exception as erro_geral:
         print(f"Erro geral na rodada: {erro_geral}")
 
+input("Pressione ENTER para sair...")
 print("Script finalizado manualmente.")
