@@ -61,3 +61,4 @@ C:\CapturaTelaVMA
 - O script foi desenvolvido para aprendizado e testes locais.  
 - Respeite sempre as regras do site para evitar bloqueios.  
 - O uso em massa ou abusivo pode ser identificado e bloqueado.
+

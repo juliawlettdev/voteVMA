@@ -259,3 +259,4 @@ while not parar_execucao:
 
 input("Pressione ENTER para sair...")
 print("Script finalizado manualmente.")
+
